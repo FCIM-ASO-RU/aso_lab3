@@ -2,22 +2,43 @@ package aso_lab3;
 
 import java.util.concurrent.CyclicBarrier;
 
-public class Consumer extends Thread {
-    
-    private static final int max = 0; // указываете в соответствии с вариантом
-    
-    private final Store store;
-    private final CyclicBarrier barrier;
-    
-    public Consumer(Store _store, CyclicBarrier _barrier, String name) {
-        store = _store;
-        barrier = _barrier;
-        setName(name);
+class Consumer extends Thread {
+    private final CyclicBarrier barr;
+    private final Store data;
+    private final String name;
+    static int max = 0;
+
+    public Consumer(final Store data, final CyclicBarrier barr,final String name) {
+        this.data = data;
+        this.name = name;
+        this.barr = barr;
     }
-    
-    @Override
+
     public void run() {
-        
+        String tmp = null;
+        int cons = 0;
+        while (true) {
+            try {
+                if (max < 54) {
+                    tmp = data.load(name);
+                    if (tmp == null) {
+                        barr.await();
+                    } else {
+                        System.out.println("" + name + " consumed " + tmp);
+                        cons++;
+                        max++;
+                        System.out.println("Consumed: " + max);
+                        sleep((int) (Math.random() * 1000));
+                    }
+                } else {
+                    tmp = data.load(name);
+                    sleep(2000);
+                    System.out.println(name + " consumed " + cons + " elements");
+                    break;
+                }
+            } catch (final Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
-    
 }
