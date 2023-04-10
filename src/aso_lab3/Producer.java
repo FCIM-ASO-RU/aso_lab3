@@ -5,7 +5,7 @@ import java.util.concurrent.CyclicBarrier;
 public class Producer extends Thread {
     
     private static final int max = 0; // указываете в соответствии с вариантом
-    private static final ReplaceMe[] products = new ReplaceMe[]{}; // меняете на то, что должно производится
+    private static final NumereImpare[] products = new NumereImpare[]{}; // меняете на то, что должно производится
     
     private final Store store;
     private final CyclicBarrier barrier;
