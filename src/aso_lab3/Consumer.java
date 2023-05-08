@@ -1,43 +1,46 @@
-package aso_lab2;
+package aso_lab3;
 
+import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.CyclicBarrier;
 
-import static aso_lab2.Store.QUANTITY;
-
-public class Consumer extends Thread {
-    private final CyclicBarrier cyclicBarrier;
+class Consumer extends Thread {
+    private final CyclicBarrier barrier;
     private final Store store;
-    private static int cons = 0;
+    private final String name;
 
-    public Consumer(Store _store, String _name, CyclicBarrier _cyclicBarrier) {
-        store = _store;
-        setName(_name);
-        this.cyclicBarrier = _cyclicBarrier;
+    private final Random random = new Random();
+
+    public Consumer(Store store, String name, CyclicBarrier barrier) {
+        this.store = store;
+        this.name = name;
+        this.barrier = barrier;
     }
 
     @Override
     public void run() {
-        // Так как было сгенерировано 47 объектов то и потреблено столько же
+        Optional<Integer> consumedInteger;
+        int consumedIntegers = 0;
 
-        try {
-            while (cons <= QUANTITY) {
-                //Код выполняемый в synchronized выполняется одним объектом и этот объект держит его ключ, пока объект не отдаст ключ никто не может выполнять этот же код
-                Integer response1, response2;
-                response1 = store.get(getName()); //Потребитель потребляет два объекта
-               response2 = store.get(getName()); //Потребитель потребляет два объекта
-                if (response1 == null && response2 == null) {
-                    cyclicBarrier.await();
+        while (true) {
+            try {
+                Thread.sleep(random.nextInt(500) + 1000);
+                if (store.getMessageCount() <= Main.MAX_MESSAGES) {
+                    consumedInteger = store.consume();
+                    if (consumedInteger.isEmpty()) {
+                        barrier.await();
+                    } else {
+                        System.out.println(name + " consumed " + consumedInteger.get());
+                        consumedIntegers++;
+                    }
                 } else {
-                    cons += 2;
-                    System.out.println("Consumers got: " + cons);
+                    System.out.println(name + " consumed " + consumedIntegers + " elements");
+                    break;
                 }
-                sleep(2000);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            System.out.println('\n' + "-->" + getName() + "  stopped");
-        } catch (Exception ex) {
-            System.out.println("Consumer ex : " + ex);
         }
     }
-
 }
 
